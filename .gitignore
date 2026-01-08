@@ -1,0 +1,102 @@
+# Node dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Optional cache
+.cache/
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React Native
+.expo/
+.expo-shared/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+ios/Pods/
+ios/build/
+
+# Environment files
+.env
+.env.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Metro / Cache
+.metro-cache/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+build/
+coverage/
+
+# React Native
+android/.gradle/
+android/app/build/
+ios/Pods/
+ios/build/
+.expo/
+
+# Environment
+.env
+.env.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+*.log
+
+# Cache
+.cache/
+.metro-cache/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
