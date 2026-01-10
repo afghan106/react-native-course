@@ -5,7 +5,7 @@ import { UserModel } from "../modle/User";
 import { AuthVerification} from "../modle/AuthVerificationToken";
 import { errorRes } from "../utiles/helper";
 import jwt from "jsonwebtoken"
-
+import mongoose from "mongoose";
 
 
 export  const Singup=async(req:Request,res:Response)=>{
@@ -28,32 +28,25 @@ const existingUser=await UserModel.findOne({gmail});
 if(existingUser)
     
     return errorRes(res,"user already exist",400);
-    
-    
-
-    
    const user=await UserModel.create({gmail,name,password});
-    
-
-
 // 6. Generate and store verification token .
 const token=crypto.randomBytes(36).toString('hex');
 
 await AuthVerification.create({owner:user._id,token})
 
-const link=`http://localhost:4000/verify?id=${user._id} && token=${token}`;
+const link=`http://localhost:4000/verify.html?id=${user._id}&token=${token}`;
 console.log(link);
 
 
 // Looking to send emails in production? Check out our Email API/SMTP product!
-var transport = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 2525,
-  auth: {
-    user: "61652e59ff6224",
-    pass: "65f7eb83eeb21b"
-  }
-});
+// var transport = nodemailer.createTransport({
+//   host: "sandbox.smtp.mailtrap.io",
+//   port: 2525,
+//   auth: {
+//     user: "61652e59ff6224",
+//     pass: "65f7eb83eeb21b"
+//   }
+// });
 
 // transport.sendMail({
 //     from :"shakir@gmail.com",
@@ -75,9 +68,12 @@ export const verify:RequestHandler=async(req,res)=>{
 
 
   //read incoming data like : id and token that send to email
-  const {id ,token}=req.body;
+    const id = req.body.id.trim();
+    const token = req.body.token.trim();
 
-  
+  if(!mongoose.Types.ObjectId.isValid(id)) return errorRes(res,"the user id is not valid",403);
+  if(!token || token.length===0) return errorRes(res,"the token is required ",403);
+
   //find the token inside the database 
   const authToken=await AuthVerification.findOne({owner:id});
   //send error if token not found .
@@ -91,14 +87,13 @@ export const verify:RequestHandler=async(req,res)=>{
   //remove token from database 
 await AuthVerification.findByIdAndDelete(authToken._id);
   //send success message
-  res.json({"message":"welcome to the app your gmail is verify"})
-
-
-
-
-
-
+  errorRes(res,"welcome to the app your gmail is verify successfully",200);
 }
+
+
+
+
+
 
 //signin controller
 export const signin:RequestHandler=async function(req,res){
@@ -145,9 +140,11 @@ user
 }
 
 
+
+
+
+
 //send profile info to client sid e
-
-
 export const sendprofile:RequestHandler=(req:any,res)=>{
 
   res.json(

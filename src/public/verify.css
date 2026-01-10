@@ -1,0 +1,114 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrapper {
+  padding: 20px;
+  width: 100%;
+}
+
+.card {
+  background: #fff;
+  max-width: 420px;
+  margin: auto;
+  padding: 40px 30px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* States */
+.state {
+  display: none;
+}
+
+.state.loading {
+  display: block;
+}
+
+/* Icons */
+.icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  font-size: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon {
+  background: #e6f7ee;
+  color: #22c55e;
+}
+
+.error-icon {
+  background: #fdecea;
+  color: #ef4444;
+}
+
+/* Spinner */
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #e5e7eb;
+  border-top: 6px solid #667eea;
+  border-radius: 50%;
+  margin: 0 auto 25px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+p {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 14px 28px;
+  background: #667eea;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 15px;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  background: #5a67d8;
+}
+
+.btn.secondary {
+  background: #ef4444;
+}
+
+.btn.secondary:hover {
+  background: #dc2626;
+}

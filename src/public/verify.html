@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Verification</title>
+  <link rel="stylesheet" href="verify.css" />
+</head>
+<body>
+ <div class="wrapper">
+    <div class="card">
+
+      <!-- Loading / Verifying -->
+      <div class="state loading">
+        <div class="spinner"></div>
+        <h2>Verifying your account</h2>
+        <p>Please wait while we verify your information.</p>
+      </div>
+
+      <!-- Success -->
+      <div class="state success">
+        <div class="icon success-icon">✓</div>
+        <h2>Account Verified</h2>
+        <p>Your account has been successfully verified.</p>
+        <a href="#" class="btn">Continue</a>
+      </div>
+
+      <!-- Error -->
+      <div class="state error">
+        <div class="icon error-icon">✕</div>
+        <h2>Verification Failed</h2>
+        <p>The verification link is invalid or has expired.</p>
+        <a href="#" class="btn secondary">Request New Link</a>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+<script src="js/verify.js"></script>
+</html>
