@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { errorRes } from "../utiles/helper";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken"
 import { UserModel } from "../modle/User";
+import { verify } from "crypto";
 
 
 
@@ -37,7 +38,11 @@ export const isAuth:RequestHandler=async(req:any,res,next)=>{
     //send the error if not exist
     //attach use profile inside req object
     req.user={
-      user
+      id:user?._id,
+      name:user?.name,
+      verify:user?.verify,
+      gmail:user?.gmail,
+      
     }
     //call next() function to do further changes in the route
 

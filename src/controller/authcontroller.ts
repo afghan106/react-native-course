@@ -5,7 +5,12 @@ import { UserModel } from "../modle/User";
 import { AuthVerification} from "../modle/AuthVerificationToken";
 import { errorRes } from "../utiles/helper";
 import jwt from "jsonwebtoken"
-import mongoose from "mongoose";
+import mongoose, { set } from "mongoose";
+import { mail } from "../utiles/mail";
+import { access } from "fs";
+
+
+const jwtSecret=process.env.JWT_SECRET||"ADIFfsal3443439902349391dfsdf54dfasdf545e4awerrhdgjtyj4tjsgscaheyjeqjrkro766545";
 
 
 export  const Singup=async(req:Request,res:Response)=>{
@@ -34,7 +39,7 @@ const token=crypto.randomBytes(36).toString('hex');
 
 await AuthVerification.create({owner:user._id,token})
 
-const link=`http://localhost:4000/verify.html?id=${user._id}&token=${token}`;
+const link=`${process.env.LINK}?id=${user._id}&token=${token}`;
 console.log(link);
 
 
@@ -43,8 +48,8 @@ console.log(link);
 //   host: "sandbox.smtp.mailtrap.io",
 //   port: 2525,
 //   auth: {
-//     user: "61652e59ff6224",
-//     pass: "65f7eb83eeb21b"
+//     user: "21332e59ff6224",
+//     pass: "11321231232322"
 //   }
 // });
 
@@ -89,12 +94,6 @@ await AuthVerification.findByIdAndDelete(authToken._id);
   //send success message
   errorRes(res,"welcome to the app your gmail is verify successfully",200);
 }
-
-
-
-
-
-
 //signin controller
 export const signin:RequestHandler=async function(req,res){
   //read incoming data
@@ -114,15 +113,15 @@ if(!user)return errorRes(res,"user dose not find in the database",403);
 
     const payload={id:user._id};
   // otherwise generate access & referesh token
-  const accessToken=jwt.sign(payload,"secret",{
-    expiresIn:"15m"
+  const accessToken=jwt.sign(payload,jwtSecret,{
+    expiresIn:"5m"
   })
-  const refreshToken=jwt.sign(payload,"secret")
+  const refreshToken=jwt.sign(payload,jwtSecret)
   //store refersh token inside DB
 
   if(!user.tokens) user.tokens=[refreshToken]
-  else user.tokens=[refreshToken];
-  user.save()
+  else user.tokens.push(refreshToken);
+  await user.save()
 
 
 
@@ -138,12 +137,6 @@ user
 
 
 }
-
-
-
-
-
-
 //send profile info to client sid e
 export const sendprofile:RequestHandler=(req:any,res)=>{
 
@@ -152,4 +145,112 @@ export const sendprofile:RequestHandler=(req:any,res)=>{
       profile:req.user
     }
   )
+}
+
+
+export const generateVerificationLink:RequestHandler=async(req:any,res)=>{
+//check if user is authenticated or not
+const {id}=req.user;
+const token=crypto.randomBytes(36).toString("hex");
+const link=`${process.env.LINK}?id=${id}&token=${token}`;
+// remove previus token if any
+await AuthVerification.findOneAndDelete({owner:id});
+await AuthVerification.create({owner:id,token});
+
+
+//send link in gmail
+//  mail.verification(req.user.gmail,link);
+
+res.json({message:"please check you gmail for verification","Link":link});
+//create/store new token and send response back
+
+
+}
+
+
+export const generateRefreshToken:RequestHandler=async(req,res)=>{
+
+const {refreshToken}=req.body;
+
+
+const payload=jwt.verify(refreshToken,'secret') as {id:string};
+
+const user=await UserModel.findOne({
+  _id:payload.id,
+  tokens:refreshToken
+})
+
+if(!user){
+  await UserModel.findByIdAndUpdate(payload.id,{tokens:[]});
+  return errorRes(res,'the token has been compromised please singn in again',403);
+}
+
+const newAccessToken=jwt.sign({id:user._id},'secret',{
+  expiresIn:'5m'
+});
+const newRefreshToken=jwt.sign({id:user._id},'secret');
+
+
+user.tokens=user.tokens.filter(t=>t!==refreshToken);
+user.tokens.push(newRefreshToken);
+user.save();
+
+res.json({tokens:{
+  refresh:newRefreshToken,
+  access:newAccessToken
+}})
+
+  //read and verify the refresh token
+  // find the user with payload;
+  // if the refresh token is valid and no user found , token is compromised
+  // remove all the previus tokens and send error response
+
+  // remove previous token , update user and send new token
+
+
+
+}
+
+
+//signout
+export const signOut:RequestHandler=async(req:any,res)=>{
+
+//remove the refresh tokens
+const {refreshtoken}=req.body;
+
+const user=await UserModel.findOne({
+  _id:req.user.id,
+  tokens:refreshtoken
+});
+
+if(!user) return errorRes(res,"the token is not valid",403);
+
+user.tokens=user.tokens.filter(t=>t!==refreshtoken);
+await user.save();
+
+res.json({message:"you signed out successfully"})
+
+}
+
+export const forgetPassword:RequestHandler=async(req,res)=>{
+
+  const {email}=req.body;
+
+  if(!email) return errorRes(res,"the email field is required",403);
+  const user=await UserModel.findOne({gmail:email});
+  if(!user) return errorRes(res,"the user acount dose not find in the database",403);
+
+
+
+//ask for user email
+//find user with the provided email
+//if user not found send error
+//generate random token and save it in database with user id (first remove previus token if any)
+//gemerate reset password link with token and send it to user email;
+//send email to user containg the link with token (link we did in verification process but with different token and different link)
+//create response to client side back with success message
+
+
+
+
 }
