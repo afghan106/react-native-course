@@ -1,7 +1,7 @@
 import { Schema, model, Document, Types } from "mongoose";
 import { hash, genSalt, compare } from "bcrypt";
 
-export interface Itoken extends Document {
+export interface resetPassword extends Document {
   owner: Types.ObjectId;
   token: string;
   createdAt: Date;
@@ -9,7 +9,7 @@ export interface Itoken extends Document {
   compareToken(token: string): Promise<boolean>;
 }
 
-const tokenSchema = new Schema<Itoken>(
+const passwordResetToken = new Schema<resetPassword>(
   {
     owner:{
       type: Schema.Types.ObjectId,
@@ -22,25 +22,25 @@ const tokenSchema = new Schema<Itoken>(
     },
     createdAt: {
       type: Date,
-      expires: 86400, // 24 hour
+      expires: 3600, // Token will expire after 1 hour
       default: Date.now,
     },
   },
   { timestamps: true }
 );
 
-tokenSchema.pre("save", async function () {
+passwordResetToken.pre("save", async function () {
   if (!this.isModified("token")) return;
 
   const salt = await genSalt(10);
   this.token = await hash(this.token, salt);
 });
 
-tokenSchema.methods.compareToken = async function (token: string) {
+passwordResetToken.methods.compareToken = async function (token: string) {
   return compare(token, this.token);
 };
 
-export const AuthVerification = model<Itoken>(
-  "AuthVerification",
-  tokenSchema
+export const PasswordResetTokenModel = model<resetPassword>(
+  "PasswordResetToken",
+  passwordResetToken
 );

@@ -11,6 +11,7 @@ app.use(express.static("src/public"));
 
 connectDB();
 
+
 app.use(authRouter);
 
 app.listen(port,()=>{

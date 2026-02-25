@@ -8,9 +8,11 @@ import jwt from "jsonwebtoken"
 import mongoose, { set } from "mongoose";
 import { mail } from "../utiles/mail";
 import { access } from "fs";
+import { PasswordResetTokenModel } from "../modle/passwordResetToken";
 
 
-const jwtSecret=process.env.JWT_SECRET||"ADIFfsal3443439902349391dfsdf54dfasdf545e4awerrhdgjtyj4tjsgscaheyjeqjrkro766545";
+
+
 
 
 export  const Singup=async(req:Request,res:Response)=>{
@@ -113,10 +115,10 @@ if(!user)return errorRes(res,"user dose not find in the database",403);
 
     const payload={id:user._id};
   // otherwise generate access & referesh token
-  const accessToken=jwt.sign(payload,jwtSecret,{
+  const accessToken=jwt.sign(payload,process.env.SECRET!,{
     expiresIn:"5m"
   })
-  const refreshToken=jwt.sign(payload,jwtSecret)
+  const refreshToken=jwt.sign(payload,process.env.SECRET!); 
   //store refersh token inside DB
 
   if(!user.tokens) user.tokens=[refreshToken]
@@ -173,7 +175,7 @@ export const generateRefreshToken:RequestHandler=async(req,res)=>{
 const {refreshToken}=req.body;
 
 
-const payload=jwt.verify(refreshToken,'secret') as {id:string};
+const payload=jwt.verify(refreshToken,process.env.SECRET!) as {id:string};
 
 const user=await UserModel.findOne({
   _id:payload.id,
@@ -185,10 +187,11 @@ if(!user){
   return errorRes(res,'the token has been compromised please singn in again',403);
 }
 
-const newAccessToken=jwt.sign({id:user._id},'secret',{
+const newAccessToken=jwt.sign({id:user._id},process.env.SECRET!,{
   expiresIn:'5m'
 });
-const newRefreshToken=jwt.sign({id:user._id},'secret');
+const newRefreshToken=jwt.sign({id:user._id},process.env.SECRET!); 
+
 
 
 user.tokens=user.tokens.filter(t=>t!==refreshToken);
@@ -232,20 +235,35 @@ res.json({message:"you signed out successfully"})
 
 }
 
+
+
+
 export const forgetPassword:RequestHandler=async(req,res)=>{
 
-  const {email}=req.body;
+const {email}=req.body;
 
-  if(!email) return errorRes(res,"the email field is required",403);
-  const user=await UserModel.findOne({gmail:email});
-  if(!user) return errorRes(res,"the user acount dose not find in the database",403);
+const user=await UserModel.findOne({gmail:email});
 
+if(!user) return errorRes(res,"user dose not find with this email",403);
+
+const token=crypto.randomBytes(36).toString("hex");
+
+await PasswordResetTokenModel.findOneAndDelete({owner:user._id});
+
+await PasswordResetTokenModel.create({owner:user._id,token});
+
+const link=`${process.env.RESET_PASSWORD_LINK}?id=${user._id}&token=${token}`;
+
+await mail.resetpassword(user.gmail,link);
+
+res.json({message:"please check your email to reset your password"});
 
 
 //ask for user email
 //find user with the provided email
 //if user not found send error
 //generate random token and save it in database with user id (first remove previus token if any)
+
 //gemerate reset password link with token and send it to user email;
 //send email to user containg the link with token (link we did in verification process but with different token and different link)
 //create response to client side back with success message

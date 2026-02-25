@@ -24,7 +24,7 @@ export const isAuth:RequestHandler=async(req:any,res,next)=>{
 
    
     //verify the token (jwt.verify ) as payload
-    const payload=jwt.verify(token,"secret")as {id:string}
+    const payload=jwt.verify(token,process.env.SECRET!)as {id:string}
     //take out the user id from token( have as payload)
 
    const user =await UserModel.findById(payload.id);
